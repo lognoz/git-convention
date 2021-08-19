@@ -51,7 +51,7 @@
                              (system* git-executable "diff" "--name-only" "--cached")))
                          "\n")]
          [staged-files-length (length staged-files)]
-         [matched-component null])
+         [matched-component #f])
     (for ([component (in-list (components))])
       (let* ([title (car component)]
              [regex (cdr component)]
