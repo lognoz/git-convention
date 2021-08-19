@@ -1,0 +1,27 @@
+#!/usr/bin/env racket
+
+#|
+  This file is to standardizing the commit messages
+  https://github.com/lognoz/gitcommit
+|#
+
+(require gitcommit/utils)
+
+(define default-component "Build")
+
+(define components
+  (append '(("Make" . #rx"^Makefile$")
+            ("Doc" . #rx"^README.md$")
+            ("Bin" . #rx"^prepare-commit-msg$|^commit-msg$")
+            ("Core" . #rx".+.rkt$"))
+          (components/files-recursively '("*.rkt" "*/*.rkt"))))
+
+(define markers
+  '("Add"
+    "Bump"
+    "Change"
+    "Fix"
+    "Move"
+    "Refactor"
+    "Remove"
+    "Rephrase"))
