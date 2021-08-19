@@ -20,6 +20,7 @@
 
 (provide components/files-recursively)
 
+
 ;; --- Requirements
 
 (require file/glob
@@ -27,10 +28,6 @@
          racket/list
          racket/string
          racket/contract)
-
-;; (for-syntax racket/base
-;;             syntax/parse
-;;             racket/syntax))
 
 
 ;; --- Implementation
@@ -55,20 +52,3 @@
 
 (define (filename-body filename)
   (path->string (path-replace-extension filename "")))
-
-
-  ;; (print pattern)
-  ;; '())
-
-;; (define-syntax (for/files-recursively stx)
-;;   (syntax-case stx ()
-;;     [(_ regex body ...)
-;;      #'((lambda (x filename)
-;;           body ...) regex "asdfasdf")]))
-
-
-     ;; #`(let ([files (glob regex)])
-     ;;     (for ([path (in-list files)])
-     ;;       (let* ([filename (path->string (file-name-from-path path))]
-     ;;              [filename-without-extension (path->string (path-replace-extension filename ""))])
-     ;;         body ...)))]))
