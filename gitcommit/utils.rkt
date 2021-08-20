@@ -32,20 +32,28 @@
 
 ;; --- Implementation
 
-(define/contract (components/files-recursively pattern)
-  (-> glob/c list?)
-  (let ([files (glob pattern)]
-        [components null])
-    (for/list ([path files])
-      (let* ([filename (filename path)]
-             [filename-body (filename-body filename)]
-             [regex (string-replace (path->string path)
-                                    (path->string (current-directory))
-                                    "")])
-        (set! components (append components
-                                 (list (cons (string-titlecase filename-body)
-                                             (regexp regex)))))))
-    components))
+(define/contract (components/files-recursively pattern [procedure null])
+  (case-> (-> glob/c list?)
+          (-> glob/c procedure? list?))
+    (let ([files (glob pattern)]
+          [components null])
+      (for/list ([path files])
+        (let* ([filename (filename path)]
+               [filename-body (filename-body filename)]
+               [regex (regex-path path)]
+               [component null])
+          (unless (null? procedure)
+            (set! component (procedure filename-body)))
+          (when (null? component)
+            (set! component (string-titlecase filename-body)))
+          (set! components
+                (append components
+                        (list (cons component regex))))))
+      components))
+
+(define (regex-path path)
+  (regexp
+    (string-replace (path->string path) (path->string (current-directory)) "")))
 
 (define (filename path)
   (path->string (file-name-from-path path)))
