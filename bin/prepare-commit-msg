@@ -20,9 +20,4 @@
   <http://www.gnu.org/licenses/>.
 |#
 
-(require gitcommit)
-
-
-;; --- Bootstrap
-
-(prepare-commit-msg)
+(require gitcommit/hook/prepare-commit-msg)
