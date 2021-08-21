@@ -17,35 +17,3 @@
   along with this program see the file LICENSE. If not see
   <http://www.gnu.org/licenses/>.
 |#
-
-(provide prepare-commit-msg)
-
-
-;; --- Requirements
-
-(require racket/file
-         racket/string
-         gitcommit/data
-         gitcommit/base
-         gitcommit/exceptions)
-
-
-;; --- Implementation
-
-(define (prepare-commit-msg)
-  (load-context)
-  (if (and (components?)
-           (default-component?)
-           (> (length argvs) 0)
-           (< (length argvs) 3))
-      (let* ([path (car argvs)]
-             [file-content
-               (if (file-exists? path)
-                   (file->string path)
-                 (exit 0))]
-             [matched-component (matched-component)])
-        (call-with-output-file path #:exists 'replace
-          (λ (out)
-            (write-string (string-append matched-component ": " file-content) out)))
-        (void))
-    (exit 0)))
