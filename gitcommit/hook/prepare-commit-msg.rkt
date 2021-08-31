@@ -24,31 +24,26 @@
          gitcommit/data)
 
 
-;; --- Implementation
+;; ;; --- Implementation
 
 (define (matched-component)
-  (let* ([staged-files (string-split
-                         (with-output-to-string
-                           (λ ()
-                             (system* git-executable "diff" "--name-only" "--cached")))
-                         "\n")]
-         [staged-files-length (length staged-files)]
+  (let* ([staged-files-length (length staged-files)]
          [matched-component #f])
-    (for ([component (in-list (components))])
+    (for/list ([component (context-ref 'components)])
       (let* ([title (car component)]
              [regex (cdr component)]
              [matched-length 0])
-        (for ([staged-file (in-list staged-files)])
+        (for/list ([staged-file staged-files])
           (when (regexp-match regex staged-file)
             (set! matched-length (+ matched-length 1)))
           (when (= matched-length staged-files-length)
             (set! matched-component title)))))
-    (or matched-component (default-component))))
+    (or matched-component (context-ref 'default-component))))
 
 
 ;; --- Hook
 
-(when (and (components?) (default-component?))
+(when (and (context? 'components) (context? 'default-component))
   (edit-commit
    (λ (content)
      (string-append (matched-component) ": " content))))
