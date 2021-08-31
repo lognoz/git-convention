@@ -17,3 +17,48 @@
   along with this program see the file LICENSE. If not see
   <http://www.gnu.org/licenses/>.
 |#
+
+(provide default-markers
+         generate-components)
+
+
+;; --- Requirements
+
+(require gitcommit/utils
+         file/glob
+         racket/list
+         racket/path
+         racket/string
+         racket/contract)
+
+
+;; --- Implementation
+
+(define default-markers
+  '("Add"
+    "Bump"
+    "Change"
+    "Fix"
+    "Move"
+    "Refactor"
+    "Remove"
+    "Rephrase"))
+
+(define/contract (generate-components pattern [procedure null])
+  (case-> (-> glob/c list?)
+          (-> glob/c procedure? list?))
+    (let ([files (glob pattern)]
+          [components null])
+      (for/list ([path files])
+        (let ([filename (file-name path)]
+              [filename-body (file-name-without-extension path)]
+              [regex (regex-from-path path)]
+              [component null])
+          (unless (null? procedure)
+            (set! component (procedure filename-body)))
+          (when (null? component)
+            (set! component (string-titlecase filename-body)))
+          (set! components
+                (append components
+                        (list (cons component regex))))))
+      components))
