@@ -18,45 +18,40 @@
   <http://www.gnu.org/licenses/>.
 |#
 
-(provide components/files-recursively)
+(provide file-name
+         file-name-without-extension
+         directory-from-path
+         regex-from-path
+         convert-to-string)
 
 
 ;; --- Requirements
 
-(require file/glob
-         racket/path
-         racket/list
-         racket/string
-         racket/contract)
+(require racket/path
+         racket/string)
 
 
-;; --- Implementation
+;; --- Implementation (path)
 
-(define/contract (components/files-recursively pattern [procedure null])
-  (case-> (-> glob/c list?)
-          (-> glob/c procedure? list?))
-    (let ([files (glob pattern)]
-          [components null])
-      (for/list ([path files])
-        (let* ([filename (filename path)]
-               [filename-body (filename-body filename)]
-               [regex (regex-path path)]
-               [component null])
-          (unless (null? procedure)
-            (set! component (procedure filename-body)))
-          (when (null? component)
-            (set! component (string-titlecase filename-body)))
-          (set! components
-                (append components
-                        (list (cons component regex))))))
-      components))
-
-(define (regex-path path)
-  (regexp
-    (string-replace (path->string path) (path->string (current-directory)) "")))
-
-(define (filename path)
+(define (file-name path)
   (path->string (file-name-from-path path)))
 
-(define (filename-body filename)
-  (path->string (path-replace-extension filename "")))
+(define (file-name-without-extension path)
+  (path->string (path-replace-extension (file-name path) "")))
+
+(define (regex-from-path path)
+  (let ([path (path->string path)]
+        [directory (path->string (current-directory))])
+    (regexp (string-append "^" (string-replace path directory "") "$"))))
+
+(define (directory-from-path path)
+  (let ([directory (string-trim (string-replace path (file-name path) "") "/")])
+    (if (string=? directory "")
+        "root"
+      directory)))
+
+
+;; --- Implementation (list)
+
+(define (convert-to-string lst)
+  (string-join lst ", " #:before-last " and "))
