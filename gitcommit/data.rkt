@@ -18,7 +18,11 @@
   <http://www.gnu.org/licenses/>.
 |#
 
-(provide (all-defined-out))
+(provide commit-file-content
+         staged-files
+         edit-commit
+         context-ref
+         context?)
 
 
 ;; --- Requirements
@@ -29,6 +33,7 @@
          racket/string
          racket/port
          racket/dict
+         racket/file
          (for-syntax racket/base
                      syntax/parse
                      racket/syntax))
@@ -37,7 +42,20 @@
 ;; --- Implementation
 
 (define argvs
-  (vector->list (current-command-line-arguments)))
+  (let ([arguments (vector->list (current-command-line-arguments))])
+    (if (and (> (length arguments) 0)
+             (< (length arguments) 3))
+        arguments
+      (exit 0))))
+
+(define commit-file
+  (let ([path (car argvs)])
+    (if (file-exists? path)
+        path
+      (exit 0))))
+
+(define commit-file-content
+  (file->string commit-file))
 
 (define git-executable
   (or (find-executable-path "git")
@@ -57,30 +75,45 @@
         path
       (exit 0))))
 
+(define staged-files
+  (string-split
+    (with-output-to-string
+      (λ ()
+        (system* git-executable "diff" "--name-only" "--cached")))
+    "\n"))
 
-;; --- Implementation (context)
+
+;; --- Git Implementation
+
+(define (edit-commit procedure)
+  (call-with-output-file commit-file #:exists 'replace
+    (λ (out)
+      (write-string (procedure commit-file-content) out)))
+  (void))
+
+
+;; --- Context Implementation
 
 (define context (make-hash))
 
 (define context-namespace (make-base-namespace))
 
+(define (context-ref reference)
+  (hash-ref context reference))
+
+(define (context? reference)
+  (and (not (null? (hash-ref context reference)))
+       (hash-ref context reference)))
+
 (define-syntax (define-context stx)
   (syntax-parse stx
     [(_ name contract)
-     #:with getter (format-id stx "~a" #'name)
-     #:with predicate (format-id stx "~a?" #'name)
      #:with setter (format-id stx "set-~a!" #'name)
      #'(begin
          ;; Variable to `null' to prevent unbound errors.
          (hash-set! context 'name null)
          (parameterize ([current-namespace context-namespace])
            (namespace-set-variable-value! 'name null))
-         ;; Function to checks if value exists.
-         (define (predicate)
-           (not (null? (hash-ref context 'name))))
-         ;; Function to get the context value.
-         (define (getter)
-           (hash-ref context 'name))
          ;; Contract definition to change the variable value into
          ;; namespace.
          (define/contract (setter value)
@@ -97,6 +130,9 @@
         ((eval setter (variable-reference->namespace (#%variable-reference))) context-value))))
     context)
 
+(define-context use-substitutions
+  (-> boolean? any))
+
 (define-context default-component
   (-> string? any))
 
@@ -105,3 +141,13 @@
 
 (define-context markers
   (-> (*list/c string?) any))
+
+(with-handlers
+  ([exn:fail:contract?
+    (λ (exn)
+      (raise-context-error
+       (exn-message exn)))])
+  (parameterize ([current-namespace context-namespace])
+    (load context-file)
+    (refresh-context)
+    (void)))
