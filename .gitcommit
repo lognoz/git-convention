@@ -5,23 +5,21 @@
   https://github.com/lognoz/gitcommit
 |#
 
-(require gitcommit/utils)
+(require gitcommit)
+
+
+;; --- Implementation
+
+(define use-substitutions #f)
+
+(define markers default-markers)
 
 (define default-component "Build")
 
 (define components
   (append '(("Make" . #rx"^Makefile$")
             ("Doc" . #rx"^README.md$")
-            ("Bin" . #rx"^prepare-commit-msg$|^commit-msg$")
+            ("Bin" . #rx"^bin/.+")
+            ("Hook" . #rx"^gitcommit/hook/.+")
             ("Core" . #rx".+.rkt$"))
-          (components/files-recursively '("*.rkt" "*/*.rkt"))))
-
-(define markers
-  '("Add"
-    "Bump"
-    "Change"
-    "Fix"
-    "Move"
-    "Refactor"
-    "Remove"
-    "Rephrase"))
+          (generate-components '("*.rkt" "*/*.rkt"))))
