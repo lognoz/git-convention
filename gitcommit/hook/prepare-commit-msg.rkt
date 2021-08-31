@@ -24,7 +24,15 @@
          gitcommit/data)
 
 
-;; ;; --- Implementation
+;; --- New features
+
+#|
+  - Add 'matched-component` only if it's not already present.
+  - Check why "^gitcommit/hook/.+" regex not working.
+|#
+
+
+;; --- Implementation
 
 (define (matched-component)
   (let* ([staged-files-length (length staged-files)]

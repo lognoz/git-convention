@@ -28,6 +28,14 @@
                      racket/syntax))
 
 
+;; --- New features
+
+#|
+  - Implement 'use-substitutions` variable.
+  - Add example commit on error.
+|#
+
+
 ;; --- Implementation
 
 (define initial-commit-message (string-trim commit-file-content))
