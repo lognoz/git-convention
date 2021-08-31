@@ -19,6 +19,7 @@
 |#
 
 (provide raise-init-error
+         raise-commit-error
          raise-context-error)
 
 
@@ -33,6 +34,10 @@
 (define (raise-init-error message-str)
   (raise-user-error 'gitcommit
     (error-template message-str)))
+
+(define (raise-commit-error sym suggestions)
+  (raise-user-error 'gitcommit
+    (error-template (string-append "You need to define a " (symbol->string sym) " (" suggestions ")."))))
 
 (define (raise-context-error message-str)
   (let* ([message (string-split message-str "\n")]
@@ -53,7 +58,7 @@
 (define (error-template message-str)
   (string-append message-str "\n\n"
                  "For more information please see the link below:\n"
-                 "https://github.com/lognoz/gitstandard"))
+                 "https://github.com/lognoz/gitcommit"))
 
 (define (context-match regex message)
   (let ([matched (regexp-match regex message)])
