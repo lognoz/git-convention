@@ -7,19 +7,16 @@
 
 (require gitcommit)
 
-
-;; --- Implementation
-
-(define use-substitutions #f)
+(define use-substitutions #t)
 
 (define markers default-markers)
 
 (define default-component "Build")
 
 (define components
-  (append '(("Make" . #rx"^Makefile$")
-            ("Doc" . #rx"^README.md$")
-            ("Bin" . #rx"^bin/.+")
-            ("Hook" . #rx"^gitcommit/hook/.+")
-            ("Core" . #rx".+.rkt$"))
-          (generate-components '("*.rkt" "*/*.rkt"))))
+  (append (generate-components '("*.rkt" "**/*.rkt"))
+          '(("Make" . "Makefile")
+            ("Doc" . "README.md")
+            ("Bin" . "bin/*")
+            ("Hook" . "gitcommit/hook/*")
+            ("Core" . "**/*.rkt"))))
