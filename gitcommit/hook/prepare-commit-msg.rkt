@@ -16,20 +16,18 @@
   You should have received a copy of the GNU General Public License
   along with this program see the file LICENSE. If not see
   <http://www.gnu.org/licenses/>.
+
+
+  --- Documentation
+
+  Add 'matched-component` only if it's not already present.
 |#
 
-(require racket/port
+(require file/glob
+         racket/port
          racket/system
          racket/string
          gitcommit/data)
-
-
-;; --- New features
-
-#|
-  - Add 'matched-component` only if it's not already present.
-  - Check why "^gitcommit/hook/.+" regex not working.
-|#
 
 
 ;; --- Implementation
@@ -37,17 +35,17 @@
 (define (matched-component)
   (let* ([staged-files-length (length staged-files)]
          [matched-component #f])
-    (for/list ([component (context-ref 'components)])
+    (for/list ([component (context-ref 'components)]
+               #:break matched-component)
       (let* ([title (car component)]
              [regex (cdr component)]
              [matched-length 0])
         (for/list ([staged-file staged-files])
-          (when (regexp-match regex staged-file)
+          (when (glob-match? regex staged-file)
             (set! matched-length (+ matched-length 1)))
           (when (= matched-length staged-files-length)
             (set! matched-component title)))))
     (or matched-component (context-ref 'default-component))))
-
 
 ;; --- Hook
 

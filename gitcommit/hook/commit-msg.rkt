@@ -16,6 +16,12 @@
   You should have received a copy of the GNU General Public License
   along with this program see the file LICENSE. If not see
   <http://www.gnu.org/licenses/>.
+
+
+  --- Documentation
+
+  Implement 'use-substitutions` variable.
+  Add example commit on error.
 |#
 
 (require racket/string
@@ -27,15 +33,6 @@
                      syntax/parse
                      racket/syntax))
 
-
-;; --- New features
-
-#|
-  - Implement 'use-substitutions` variable.
-  - Add example commit on error.
-|#
-
-
 ;; --- Implementation
 
 (define initial-commit-message (string-trim commit-file-content))
@@ -43,7 +40,7 @@
 (define commit-message initial-commit-message)
 
 
-;; --- Implementation (replacement)
+;; --- Replacement Implementation
 
 (define replacements (make-hash))
 
@@ -110,7 +107,7 @@
       commit-message)))
 
 
-;; --- Implementation (validation)
+;; --- Validation Implementation
 
 (define matched-component null)
 
