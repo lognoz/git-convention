@@ -42,7 +42,7 @@
 (define (regex-from-path path)
   (let ([path (path->string path)]
         [directory (path->string (current-directory))])
-    (regexp (string-append "^" (string-replace path directory "") "$"))))
+    (string-replace path directory "")))
 
 (define (directory-from-path path)
   (let ([directory (string-trim (string-replace path (file-name path) "") "/")])
