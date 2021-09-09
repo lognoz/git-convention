@@ -16,16 +16,21 @@
   You should have received a copy of the GNU General Public License
   along with this program see the file LICENSE. If not see
   <http://www.gnu.org/licenses/>.
+
+
+  --- Documentation
+
+  This file is the first to be loaded. If the argvs, commit file or
+  git executable is not found, the program will be exited. The
+  intention is to speed up the execution time if the right
+  configuration is not ensured.
 |#
 
 (provide commit-file-content
-         staged-files
          edit-commit
+         staged-files
          context-ref
          context?)
-
-
-;; --- Requirements
 
 (require gitcommit/exceptions
          racket/contract
@@ -39,7 +44,7 @@
                      racket/syntax))
 
 
-;; --- Implementation
+;; --- Internal variables
 
 (define argvs
   (let ([arguments (vector->list (current-command-line-arguments))])
@@ -53,9 +58,6 @@
     (if (file-exists? path)
         path
       (exit 0))))
-
-(define commit-file-content
-  (file->string commit-file))
 
 (define git-executable
   (or (find-executable-path "git")
@@ -75,6 +77,9 @@
         path
       (exit 0))))
 
+
+;; --- External implementation
+
 (define staged-files
   (string-split
     (with-output-to-string
@@ -82,39 +87,43 @@
         (system* git-executable "diff" "--name-only" "--cached")))
     "\n"))
 
+(define commit-file-content
+  (file->string commit-file))
 
-;; --- Git Implementation
-
-(define (edit-commit procedure)
+(define/contract (edit-commit procedure)
+  (-> procedure? void?)
   (call-with-output-file commit-file #:exists 'replace
     (λ (out)
       (write-string (procedure commit-file-content) out)))
   (void))
 
+(define/contract (context-ref reference)
+  (-> symbol? any)
+  (hash-ref context reference))
 
-;; --- Context Implementation
+(define/contract (context? reference)
+  (-> symbol? any)
+  (and (not (null? (hash-ref context reference)))
+       (hash-ref context reference)))
+
+
+;; --- Internal implementation
 
 (define context (make-hash))
 
 (define context-namespace (make-base-namespace))
-
-(define (context-ref reference)
-  (hash-ref context reference))
-
-(define (context? reference)
-  (and (not (null? (hash-ref context reference)))
-       (hash-ref context reference)))
 
 (define-syntax (define-context stx)
   (syntax-parse stx
     [(_ name contract)
      #:with setter (format-id stx "set-~a!" #'name)
      #'(begin
-         ;; Variable to `null' to prevent unbound errors.
+         ;; Set hash to `null' and namespace variables to prevent
+         ;; unbound errors.
          (hash-set! context 'name null)
          (parameterize ([current-namespace context-namespace])
            (namespace-set-variable-value! 'name null))
-         ;; Contract definition to change the variable value into
+         ;; Define contract to change the variable value into
          ;; namespace.
          (define/contract (setter value)
            contract
@@ -137,7 +146,7 @@
   (-> string? any))
 
 (define-context components
-  (-> (*list/c (cons/c string? regexp?)) any))
+  (-> (*list/c (cons/c string? path-string?)) any))
 
 (define-context markers
   (-> (*list/c string?) any))
