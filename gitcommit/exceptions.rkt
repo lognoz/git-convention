@@ -52,7 +52,7 @@
           (set! expected (string-trim (context-match #rx"expected:? a?(.+)" (second message)) "?"))
           (set! given (context-match #rx"given: (.+)" (third message)))
           (raise-user-error who
-            (error-template (format "Expected to be defined with a ~a, ~s is given." expected given))))
+            (error-template (format "Expected to be defined with a ~a, ~a is given." expected given))))
       (raise-user-error message-str))))
 
 (define (error-template message-str)
