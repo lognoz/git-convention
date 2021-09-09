@@ -38,6 +38,9 @@
   '("Add"
     "Bump"
     "Change"
+    "Update"
+    "Use"
+    "Optimize"
     "Fix"
     "Move"
     "Refactor"
@@ -57,7 +60,7 @@
           (unless (null? procedure)
             (set! component (procedure filename-body)))
           (when (null? component)
-            (set! component (string-titlecase filename-body)))
+            (set! component (string-titlecase (string-replace filename-body "-" " "))))
           (set! components
                 (append components
                         (list (cons component regex))))))
