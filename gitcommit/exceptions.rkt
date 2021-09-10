@@ -22,9 +22,6 @@
          raise-commit-error
          raise-context-error)
 
-
-;; --- Requirements
-
 (require racket/string
          racket/list)
 
@@ -47,7 +44,6 @@
          [given null])
     (if (not (void? context))
         (begin
-          (print context)
           (set! who (string->symbol context))
           (set! expected (string-trim (context-match #rx"expected:? a?(.+)" (second message)) "?"))
           (set! given (context-match #rx"given: (.+)" (third message)))
