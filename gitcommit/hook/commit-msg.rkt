@@ -20,7 +20,6 @@
 
   --- Documentation
 
-  Implement 'use-substitutions` variable.
   Add example commit on error.
 |#
 
@@ -33,14 +32,14 @@
                      syntax/parse
                      racket/syntax))
 
-;; --- Implementation
+;; --- Internal variables
 
-(define initial-commit-message (string-trim commit-file-content))
+(define initial-commit-message commit-file-content)
 
 (define commit-message initial-commit-message)
 
 
-;; --- Replacement Implementation
+;; --- Replacement implementation
 
 (define replacements (make-hash))
 
@@ -99,20 +98,17 @@
         [context (plural-replacement replacement-files "file")])
     (string-append text " " context)))
 
-(apply-replacements)
+(when (context? 'use-substitutions)
+  (apply-replacements)
+  (unless (string=? commit-message initial-commit-message)
+    (edit-commit
+      (λ (content)
+        commit-message))))
 
-(unless (string=? commit-message initial-commit-message)
-  (edit-commit
-    (λ (content)
-      commit-message)))
 
-
-;; --- Validation Implementation
+;; --- Validation implementation
 
 (define matched-component null)
-
-(define header-commit-message
-  (car (string-split commit-message "\n")))
 
 (define-syntax (regexp-match-commit syntax-object)
   (syntax-case syntax-object ()
