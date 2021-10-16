@@ -24,9 +24,6 @@
          regex-from-path
          convert-to-string)
 
-
-;; --- Requirements
-
 (require racket/path
          racket/string)
 

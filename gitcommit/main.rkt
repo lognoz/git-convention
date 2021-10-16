@@ -21,9 +21,6 @@
 (provide default-markers
          generate-components)
 
-
-;; --- Requirements
-
 (require gitcommit/utils
          file/glob
          racket/list
