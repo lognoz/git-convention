@@ -27,6 +27,7 @@
 |#
 
 (provide commit-file-content
+         header-commit-message
          edit-commit
          staged-files
          context-ref
@@ -88,7 +89,10 @@
     "\n"))
 
 (define commit-file-content
-  (file->string commit-file))
+  (string-trim (file->string commit-file)))
+
+(define header-commit-message
+  (car (string-split commit-file-content "\n")))
 
 (define/contract (edit-commit procedure)
   (-> procedure? void?)
