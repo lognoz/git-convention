@@ -89,7 +89,7 @@
     "\n"))
 
 (define commit-file-content
-  (string-trim (file->string commit-file)))
+  (string-trim (file->string commit-file) #:left? #f))
 
 (define header-commit-message
   (car (string-split commit-file-content "\n")))
