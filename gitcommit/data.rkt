@@ -29,6 +29,7 @@
 (provide commit-file-content
          header-commit-message
          edit-commit
+         regexp-match-commit
          staged-files
          context-ref
          context?)
@@ -93,6 +94,12 @@
 
 (define header-commit-message
   (car (string-split commit-file-content "\n")))
+
+(define-syntax (regexp-match-commit syntax-object)
+  (syntax-case syntax-object ()
+    ((_ a ...)
+     #'(regexp-match (regexp (string-append a ...))
+                     header-commit-message))))
 
 (define/contract (edit-commit procedure)
   (-> procedure? void?)

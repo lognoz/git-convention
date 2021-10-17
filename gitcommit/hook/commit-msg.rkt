@@ -110,12 +110,6 @@
 
 (define matched-component null)
 
-(define-syntax (regexp-match-commit syntax-object)
-  (syntax-case syntax-object ()
-    ((_ a ...)
-     #'(regexp-match (regexp (string-append a ...))
-                     header-commit-message))))
-
 (define (validate-component)
   (let* ([default-component (cons (context-ref 'default-component) ".+")]
          [components (append (context-ref 'components) (list default-component))])
