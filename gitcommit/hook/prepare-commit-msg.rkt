@@ -16,11 +16,6 @@
   You should have received a copy of the GNU General Public License
   along with this program see the file LICENSE. If not see
   <http://www.gnu.org/licenses/>.
-
-
-  --- Documentation
-
-  Add 'matched-component` only if it's not already present.
 |#
 
 (require file/glob
@@ -47,9 +42,12 @@
             (set! matched-component title)))))
     (or matched-component (context-ref 'default-component))))
 
+
 ;; --- Hook
 
-(when (and (context? 'components) (context? 'default-component))
+(when (and (context? 'components)
+           (context? 'default-component)
+           (not (regexp-match-commit "^[A-Z1-9].+:")))
   (edit-commit
    (λ (content)
      (string-append (matched-component) ": " content))))
