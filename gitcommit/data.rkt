@@ -28,7 +28,9 @@
 
 (provide commit-file-content
          header-commit-message
+         set-header-commit-message
          edit-commit
+         refresh-commit
          regexp-match-commit
          staged-files
          context-ref
@@ -93,13 +95,34 @@
   (string-trim (file->string commit-file) #:left? #f))
 
 (define header-commit-message
-  (car (string-split commit-file-content "\n")))
+  (unless (string=? commit-file-content "")
+    (car (string-split commit-file-content "\n"))))
+
+(define body-commit-message
+  (unless (string=? commit-file-content "")
+    (let ([content (string-split commit-file-content "\n")])
+      (when (> (length content) 1)
+        (string-join (cdr content) "\n")))))
+
+(define (set-header-commit-message content)
+  (set! header-commit-message content))
 
 (define-syntax (regexp-match-commit syntax-object)
   (syntax-case syntax-object ()
     ((_ a ...)
      #'(regexp-match (regexp (string-append a ...))
                      header-commit-message))))
+
+(define (refresh-commit)
+  (call-with-output-file commit-file #:exists 'replace
+    (λ (out)
+      (write-string (string-append (if (string? header-commit-message)
+                                            header-commit-message
+                                          "")
+                                   (if (string? body-commit-message)
+                                            body-commit-message
+                                          "")) out)))
+  (void))
 
 (define/contract (edit-commit procedure)
   (-> procedure? void?)
@@ -154,6 +177,9 @@
   (-> boolean? any))
 
 (define-context default-component
+  (-> string? any))
+
+(define-context default-commit-message
   (-> string? any))
 
 (define-context components

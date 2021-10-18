@@ -45,9 +45,18 @@
 
 ;; --- Hook
 
-(when (and (context? 'components)
-           (context? 'default-component)
-           (not (regexp-match-commit "^[A-Z1-9].+:")))
-  (edit-commit
-   (λ (content)
-     (string-append (matched-component) ": " content))))
+(let ([refresh-commit? #f])
+  ;; Add default commit message if it's empty.
+  (when (and (void? header-commit-message)
+            (context? 'default-commit-message))
+    (set-header-commit-message (context-ref 'default-commit-message))
+    (set! refresh-commit? #t))
+  ;; Add matched component if it's not present.
+  (when (and (context? 'components)
+            (context? 'default-component)
+            (not (regexp-match-commit "^[A-Z1-9].+:")))
+    (set-header-commit-message (string-append (matched-component) ": " header-commit-message))
+    (set! refresh-commit? #t))
+  ;; Edit commit.
+  (when refresh-commit?
+    (refresh-commit)))
